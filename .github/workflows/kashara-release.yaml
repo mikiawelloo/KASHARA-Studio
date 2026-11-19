@@ -1,0 +1,34 @@
+name: Publish existing KASHARA 0.7
+on:
+  push:
+    branches: [kashara-native]
+    paths: ['.github/workflows/kashara-release.yaml']
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve original archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts/14553716728/zip > KASHARA-Studio-0.7.zip
+          echo '266eec66e0eeef7079a5e1b5d853bb6bcb632d6c01466b1730f731dd1431924b  KASHARA-Studio-0.7.zip' | sha256sum -c -
+          unzip -tq KASHARA-Studio-0.7.zip
+      - name: Publish portable archive and resumable chunks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          split -b 20M -d -a 2 KASHARA-Studio-0.7.zip KASHARA-0.7.zip.part
+          sha256sum KASHARA-Studio-0.7.zip > SHA256SUMS.txt
+          python - <<'PY'
+          from pathlib import Path
+          names = sorted(p.name for p in Path('.').glob('KASHARA-0.7.zip.part*'))
+          Path('ASSEMBLE.cmd').write_bytes(('@echo off\r\ncd /d "%~dp0"\r\ncopy /b '+ '+'.join('"'+n+'"' for n in names) +' "KASHARA-Studio-0.7.zip"\r\npause\r\n').encode('ascii'))
+          PY
+          gh release view kashara-v0.7 >/dev/null 2>&1 || gh release create kashara-v0.7 --target 29363169e6b3b3a2da21200bf1c12df8e8a02539 --title "KASHARA Studio 0.7 Native Alpha" --notes "Unofficial OBS fork. Portable Windows x64 alpha; extract all files and launch START-KASHARA.cmd. Source available at the tagged commit. Download either the full ZIP or all numbered parts plus ASSEMBLE.cmd. Not runtime-tested." --prerelease
+          gh release upload kashara-v0.7 KASHARA-Studio-0.7.zip SHA256SUMS.txt ASSEMBLE.cmd KASHARA-0.7.zip.part* --clobber
