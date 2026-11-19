@@ -14,6 +14,11 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Set local build version tag
+        shell: pwsh
+        run: |
+          git tag -f 0.7.0 HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot set local build version' }
       - name: Build native application
         uses: ./.github/actions/build-obs
         with:
