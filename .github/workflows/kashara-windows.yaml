@@ -1,0 +1,37 @@
+name: KASHARA Windows x64
+on:
+  workflow_dispatch:
+  push:
+    branches: [kashara-native]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Build native application
+        uses: ./.github/actions/build-obs
+        with:
+          target: x64
+          config: Release
+      - name: Package complete portable program
+        shell: pwsh
+        run: |
+          $root = Resolve-Path build_x64/install
+          $exe = Join-Path $root 'bin/64bit/obs64.exe'
+          if (!(Test-Path $exe)) { throw 'Missing native executable' }
+          if (!(Test-Path (Join-Path $root 'obs-plugins/64bit/obs-browser.dll'))) { throw 'Missing browser source' }
+          New-Item -ItemType File -Path (Join-Path $root 'portable_mode.txt') -Force
+          Set-Content -Path (Join-Path $root 'START-KASHARA.cmd') -Value '@echo off','cd /d "%~dp0bin\64bit"','start "" obs64.exe --portable'
+      - name: Upload Windows application
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: KASHARA-Studio-Windows-x64
+          path: build_x64/install/
+          if-no-files-found: error
+          retention-days: 14
