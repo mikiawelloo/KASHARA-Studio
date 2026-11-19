@@ -30,7 +30,7 @@ jobs:
           $root = Resolve-Path build_x64/install
           $exe = Join-Path $root 'bin/64bit/obs64.exe'
           if (!(Test-Path $exe)) { throw 'Missing native executable' }
-          if (!(Test-Path (Join-Path $root 'obs-plugins/64bit/obs-browser.dll'))) { throw 'Missing browser source' }
+          if (!(Test-Path (Join-Path $root 'core/obs-browser/obs-browser.dll'))) { throw 'Missing browser source' }
           New-Item -ItemType File -Path (Join-Path $root 'portable_mode.txt') -Force
           Set-Content -Path (Join-Path $root 'START-KASHARA.cmd') -Value '@echo off','cd /d "%~dp0bin\64bit"','start "" obs64.exe --portable'
       - name: Upload Windows application
