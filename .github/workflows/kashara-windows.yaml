@@ -18,7 +18,7 @@ jobs:
       - name: Set local build version tag
         shell: pwsh
         run: |
-          git tag -f 1.0.0 HEAD
+          git tag -f 1.1.0 HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Cannot set local build version' }
       - name: Build native application
         uses: ./.github/actions/build-obs
@@ -43,7 +43,7 @@ jobs:
       - name: Upload Windows application
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: KASHARA-Studio-1.0-Alpha-Windows-x64
+          name: KASHARA-Studio-1.1-Alpha-Windows-x64
           path: build_x64/install/
           if-no-files-found: error
           retention-days: 14
