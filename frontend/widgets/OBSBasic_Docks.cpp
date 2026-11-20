@@ -85,15 +85,13 @@ void OBSBasic::on_resetDocks_triggered(bool force)
 	ui->scenesDock->setVisible(true);
 	ui->sourcesDock->setVisible(true);
 	ui->mixerDock->setVisible(true);
-	ui->transitionsDock->setVisible(true);
+	ui->transitionsDock->setVisible(false);
 	controlsDock->setVisible(true);
 	statsDock->setVisible(false);
 	statsDock->setFloating(true);
 
-	QList<QDockWidget *> bottomDocks{ui->mixerDock, ui->transitionsDock, controlsDock};
-
-	resizeDocks(bottomDocks, {bottomDocksHeight, bottomDocksHeight, bottomDocksHeight}, Qt::Vertical);
-	resizeDocks(bottomDocks, {cx * 45 / 100, cx * 14 / 100, cx * 16 / 100}, Qt::Horizontal);
+	resizeDocks({ui->mixerDock, controlsDock}, {bottomDocksHeight * 2, bottomDocksHeight}, Qt::Vertical);
+	resizeDocks({ui->mixerDock, controlsDock}, {cx * 22 / 100, cx * 22 / 100}, Qt::Horizontal);
 
 	int sideDockWidth = std::min(width() * 30 / 100, 280);
 	resizeDocks({ui->scenesDock, ui->sourcesDock}, {sideDockWidth, sideDockWidth}, Qt::Horizontal);

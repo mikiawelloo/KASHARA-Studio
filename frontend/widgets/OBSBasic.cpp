@@ -58,6 +58,18 @@
 #include <qt-wrappers.hpp>
 
 #include <QActionGroup>
+#include <QToolBar>
+#include <QToolButton>
+#include <QLineEdit>
+#include <QMenu>
+#include <QLabel>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QCoreApplication>
+#include <QFileInfo>
+#include <QUrl>
+#include <QUuid>
 #include <QThread>
 #include <QWidgetAction>
 
@@ -246,6 +258,81 @@ OBSBasic::OBSBasic(QWidget *parent) : OBSMainWindow(parent), undo_s(ui), ui(new 
 	resizeDocks({ui->scenesDock, ui->sourcesDock}, {sideDockWidth, sideDockWidth}, Qt::Horizontal);
 	addDockWidget(Qt::BottomDockWidgetArea, controlsDock);
 
+	// KASHARA workspace: keep scene editing and live output controls independent.
+	addDockWidget(Qt::RightDockWidgetArea, ui->mixerDock);
+	splitDockWidget(ui->mixerDock, controlsDock, Qt::Vertical);
+	auto *workspace = new QToolBar(QStringLiteral("KASHARA Workspace"), this);
+	workspace->setObjectName(QStringLiteral("kasharaWorkspace"));
+	workspace->setMovable(false);
+	workspace->setFloatable(false);
+	workspace->setToolButtonStyle(Qt::ToolButtonTextOnly);
+	addToolBar(Qt::TopToolBarArea, workspace);
+	auto *brand = new QLabel(QStringLiteral("  KASHARA   /   LIVE STUDIO  "), workspace);
+	brand->setObjectName(QStringLiteral("kasharaBrand"));
+	workspace->addWidget(brand);
+	workspace->addSeparator();
+	workspace->addAction(QStringLiteral("Stream"), this, [this] { StreamActionTriggered(); });
+	workspace->addAction(QStringLiteral("Record"), this, [this] { RecordActionTriggered(); });
+	workspace->addSeparator();
+	workspace->addAction(QStringLiteral("YouTube Studio"), this, [] {
+		QDesktopServices::openUrl(QUrl(QStringLiteral("https://studio.youtube.com/")));
+	});
+	workspace->addAction(QStringLiteral("Settings"), this, [this] { on_action_Settings_triggered(); });
+	auto addWidgetSource = [this](bool demo) {
+		OBSScene scene = GetCurrentScene();
+		if (!scene) {
+			QMessageBox::warning(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("Create or select a scene first."));
+			return;
+		}
+		QString address;
+		if (demo) {
+			address = QCoreApplication::applicationDirPath() + QStringLiteral("/../../widgets/demo.html");
+			if (!QFileInfo::exists(address)) {
+				QMessageBox::warning(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("Demo widget file is missing."));
+				return;
+			}
+			address = QFileInfo(address).absoluteFilePath();
+		} else {
+			bool ok = false;
+			address = QInputDialog::getText(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("HTTPS widget URL (alerts, overlays, chat):"), QLineEdit::Normal, QString(), &ok).trimmed();
+			if (!ok || address.isEmpty())
+				return;
+			QUrl parsed(address);
+			if (!parsed.isValid() || parsed.scheme() != QStringLiteral("https") || parsed.host().isEmpty()) {
+				QMessageBox::warning(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("Enter a valid HTTPS URL."));
+				return;
+			}
+		}
+		obs_video_info video = {};
+		obs_get_video_info(&video);
+		obs_data_t *settings = obs_data_create();
+		obs_data_set_bool(settings, "is_local_file", demo);
+		obs_data_set_string(settings, demo ? "local_file" : "url", address.toUtf8().constData());
+		obs_data_set_int(settings, "width", video.base_width ? video.base_width : 1920);
+		obs_data_set_int(settings, "height", video.base_height ? video.base_height : 1080);
+		QString name = (demo ? QStringLiteral("KASHARA Demo ") : QStringLiteral("KASHARA Widget ")) + QUuid::createUuid().toString(QUuid::WithoutBraces).left(8);
+		obs_source_t *source = obs_source_create("browser_source", name.toUtf8().constData(), settings, nullptr);
+		obs_data_release(settings);
+		if (!source) {
+			QMessageBox::warning(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("Browser source is unavailable."));
+			return;
+		}
+		obs_sceneitem_t *item = obs_scene_add(scene, source);
+		obs_source_release(source);
+		if (!item) {
+			QMessageBox::warning(this, QStringLiteral("KASHARA Widgets"), QStringLiteral("Could not add the widget."));
+			return;
+		}
+		SaveProject();
+	};
+	auto *widgetsMenu = new QMenu(QStringLiteral("Widgets"), workspace);
+	widgetsMenu->addAction(QStringLiteral("Add web widget"), this, [addWidgetSource] { addWidgetSource(false); });
+	widgetsMenu->addAction(QStringLiteral("Add test animation"), this, [addWidgetSource] { addWidgetSource(true); });
+	auto *widgetButton = new QToolButton(workspace);
+	widgetButton->setText(QStringLiteral("Widgets"));
+	widgetButton->setMenu(widgetsMenu);
+	widgetButton->setPopupMode(QToolButton::InstantPopup);
+	workspace->addWidget(widgetButton);
 	startingDockLayout = saveState();
 
 	statsDock = new OBSDock();

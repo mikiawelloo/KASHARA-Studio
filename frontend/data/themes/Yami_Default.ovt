@@ -58,3 +58,8 @@ QDockWidget::title { background: #202020; padding: 5px; border-bottom: 1px solid
 QPushButton { border-radius: 2px; }
 QListWidget::item:selected, QTreeView::item:selected { background: #444444; color: #ffffff; }
 QToolTip { background: #252525; color: #ffffff; border: 1px solid #555555; }
+
+QToolBar#kasharaWorkspace { background: #171717; border-bottom: 1px solid #393939; spacing: 8px; padding: 7px; }
+QLabel#kasharaBrand { color: #ffffff; font-weight: bold; }
+QToolBar#kasharaWorkspace QToolButton { color: #eeeeee; background: #292929; border: 1px solid #414141; padding: 7px 12px; border-radius: 2px; }
+QToolBar#kasharaWorkspace QToolButton:hover { background: #454545; }

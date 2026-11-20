@@ -18,7 +18,7 @@ jobs:
       - name: Set local build version tag
         shell: pwsh
         run: |
-          git tag -f 0.8.0 HEAD
+          git tag -f 0.9.0 HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Cannot set local build version' }
       - name: Build native application
         uses: ./.github/actions/build-obs
@@ -35,6 +35,8 @@ jobs:
           New-Item -ItemType File -Path (Join-Path $root 'portable_mode.txt') -Force
           Set-Content -Path (Join-Path $root 'START-KASHARA.cmd') -Value '@echo off','cd /d "%~dp0bin\64bit"','start "" KASHARA-Studio.exe --portable'
           New-Item -ItemType File -Path (Join-Path $root 'disable_updater.txt') -Force
+          New-Item -ItemType Directory -Path (Join-Path $root 'widgets') -Force
+          Copy-Item 'kashara/widgets/demo.html' (Join-Path $root 'widgets/demo.html')
           $services = Get-ChildItem $root -Filter services.json -Recurse | Where-Object { (Get-Content $_.FullName -Raw) -match 'rtmps://a.rtmps.youtube.com' }
           if (!$services) { throw 'Missing YouTube RTMPS service definition' }
       - name: Upload Windows application
