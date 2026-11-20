@@ -56,7 +56,7 @@ static log_handler_t def_log_handler;
 extern string currentLogFile;
 extern string lastLogFile;
 
-bool portable_mode = false;
+bool portable_mode = true;
 bool steam = false;
 bool safe_mode = false;
 bool disable_3p_plugins = false;
@@ -72,7 +72,7 @@ bool opt_start_virtualcam = false;
 bool opt_minimize_tray = false;
 bool opt_allow_opengl = false;
 bool opt_always_on_top = false;
-bool opt_disable_updater = false;
+bool opt_disable_updater = true;
 bool opt_disable_missing_files_check = false;
 string opt_starting_collection;
 string opt_starting_profile;
@@ -1061,7 +1061,7 @@ int main(int argc, char *argv[])
 			exit(0);
 
 		} else if (arg_is(argv[i], "--version", "-V")) {
-			std::cout << "OBS Studio - " << App()->GetVersionString(false) << "\n";
+			std::cout << "KASHARA Studio - " << App()->GetVersionString(false) << "\n";
 			exit(0);
 		}
 	}

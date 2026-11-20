@@ -24,12 +24,37 @@
 }
 
 @OBSThemeVars {
-    --grey1: rgb(97,97,97);
-    --grey2: rgb(87,87,87);
-    --grey3: rgb(77,77,77);
-    --grey4: rgb(67,67,67);
-    --grey5: rgb(57,57,57);
-    --grey6: rgb(47,47,47);
-    --grey7: rgb(33,33,33);
-    --grey8: rgb(21,21,21);
+    --grey1: #666666;
+    --grey2: #505050;
+    --grey3: #414141;
+    --grey4: #303030;
+    --grey5: #262626;
+    --grey6: #1c1c1c;
+    --grey7: #141414;
+    --grey8: #090909;
+    --blue1: #dddddd;
+    --blue2: #a0a0a0;
+    --blue3: #555555;
+    --blue4: #383838;
+    --blue5: #262626;
+    --blue6: #181818;
+    --primary: #555555;
+    --primary_light: #777777;
+    --primary_lighter: #dedede;
+    --primary_dark: #383838;
+    --primary_darker: #262626;
+    --bg_window: #141414;
+    --bg_base: #1c1c1c;
+    --bg_preview: #090909;
+    --border_radius: 2px;
+    --border_radius_small: 1px;
+    --border_radius_large: 3px;
+    --palette_link: #dddddd;
+    --palette_linkVisited: #bbbbbb;
 }
+QMenuBar { border-bottom: 1px solid #303030; }
+QStatusBar { border-top: 1px solid #303030; }
+QDockWidget::title { background: #202020; padding: 5px; border-bottom: 1px solid #333333; }
+QPushButton { border-radius: 2px; }
+QListWidget::item:selected, QTreeView::item:selected { background: #444444; color: #ffffff; }
+QToolTip { background: #252525; color: #ffffff; border: 1px solid #555555; }
