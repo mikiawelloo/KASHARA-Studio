@@ -18,7 +18,7 @@ jobs:
       - name: Set local build version tag
         shell: pwsh
         run: |
-          git tag -f 0.9.0 HEAD
+          git tag -f 1.0.0 HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Cannot set local build version' }
       - name: Build native application
         uses: ./.github/actions/build-obs
@@ -33,16 +33,17 @@ jobs:
           if (!(Test-Path $exe)) { throw 'Missing native executable' }
           if (!(Test-Path (Join-Path $root 'core/obs-browser/obs-browser.dll'))) { throw 'Missing browser source' }
           New-Item -ItemType File -Path (Join-Path $root 'portable_mode.txt') -Force
-          Set-Content -Path (Join-Path $root 'START-KASHARA.cmd') -Value '@echo off','cd /d "%~dp0bin\64bit"','start "" KASHARA-Studio.exe --portable'
+          Set-Content -Path (Join-Path $root 'START-KASHARA.cmd') -Value '@echo off','cd /d "%~dp0bin\64bit"','start "" KASHARA-Studio.exe'
           New-Item -ItemType File -Path (Join-Path $root 'disable_updater.txt') -Force
           New-Item -ItemType Directory -Path (Join-Path $root 'widgets') -Force
           Copy-Item 'kashara/widgets/demo.html' (Join-Path $root 'widgets/demo.html')
+          Remove-Item (Join-Path $root 'bin/64bit/KASHARA-Legacy.exe') -ErrorAction SilentlyContinue
           $services = Get-ChildItem $root -Filter services.json -Recurse | Where-Object { (Get-Content $_.FullName -Raw) -match 'rtmps://a.rtmps.youtube.com' }
           if (!$services) { throw 'Missing YouTube RTMPS service definition' }
       - name: Upload Windows application
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: KASHARA-Studio-Windows-x64
+          name: KASHARA-Studio-1.0-Alpha-Windows-x64
           path: build_x64/install/
           if-no-files-found: error
           retention-days: 14

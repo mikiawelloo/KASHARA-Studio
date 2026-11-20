@@ -113,4 +113,12 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Source Files" FILES ${ta
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Header Files" FILES ${target_hpp_sources})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Qt Files" FILES ${target_qt_sources})
 
-set_target_properties_obs(obs-studio PROPERTIES FOLDER frontend OUTPUT_NAME "$<IF:$<PLATFORM_ID:Windows>,KASHARA-Studio,obs>")
+set_target_properties_obs(obs-studio PROPERTIES FOLDER frontend OUTPUT_NAME "$<IF:$<PLATFORM_ID:Windows>,KASHARA-Legacy,obs>")
+
+if(OS_WINDOWS)
+  add_executable(kashara-native WIN32 "${CMAKE_SOURCE_DIR}/kashara/native/main.cpp")
+  target_compile_features(kashara-native PRIVATE cxx_std_20)
+  target_link_libraries(kashara-native PRIVATE OBS::libobs Qt6::Widgets)
+  set_target_properties_obs(kashara-native PROPERTIES FOLDER frontend OUTPUT_NAME KASHARA-Studio)
+  add_dependencies(obs-studio kashara-native)
+endif()
